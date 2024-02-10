@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Delivery struct {
-	ID      int    `db:"id" json:"delivery_id,omitempty"`
+	OrderID string `db:"order_id" json:"order_uid,omitempty"`
 	Name    string `db:"name" json:"name"`
 	Phone   string `db:"phone" json:"phone"`
 	Zip     string `db:"zip" json:"zip"`
@@ -14,8 +14,9 @@ type Delivery struct {
 }
 
 type Payment struct {
-	ID            int    `db:"id" json:"id"`
-	TransactionID string `db:"transaction_id" json:"transaction"`
+	ID            int    `db:"id" json:"id,omitempty"`
+	TransactionID string `db:"transaction" json:"transaction"`
+	OrderID       string `db:"order_id" json:"order_uid,omitempty"`
 	RequestID     string `db:"request_id" json:"request_id"`
 	Currency      string `db:"currency" json:"currency"`
 	Provider      string `db:"provider" json:"provider"`
@@ -28,14 +29,15 @@ type Payment struct {
 }
 
 type Item struct {
-	ID          int    `db:"id" json:"item_id,omitempty"`
+	ID          int    `db:"id" json:"id,omitempty"`
+	OrderID     string `db:"order_id" json:"order_uid,omitempty"`
 	ChrtID      int    `db:"chrt_id" json:"chrt_id"`
 	TrackNumber string `db:"track_number" json:"track_number"`
 	Price       int    `db:"price" json:"price"`
-	Rid         string `db:"rid" json:"rid"`
+	RID         string `db:"rid" json:"rid"`
 	Name        string `db:"name" json:"name"`
 	Sale        int    `db:"sale" json:"sale"`
-	Size        string `db:"item_size" json:"size"`
+	Size        string `db:"size" json:"size"`
 	TotalPrice  int    `db:"total_price" json:"total_price"`
 	NmID        int    `db:"nm_id" json:"nm_id"`
 	Brand       string `db:"brand" json:"brand"`
@@ -46,6 +48,9 @@ type Order struct {
 	OrderUID          string    `db:"order_uid" json:"order_uid"`
 	TrackNumber       string    `db:"track_number" json:"track_number"`
 	Entry             string    `db:"entry" json:"entry"`
+	Delivery          *Delivery `db:"delivery" json:"delivery"`
+	Payment           *Payment  `db:"payment" json:"payment"`
+	Item              []Item    `db:"items" json:"items"`
 	Locale            string    `db:"locale" json:"locale"`
 	InternalSignature string    `db:"internal_signature" json:"internal_signature"`
 	CustomerID        string    `db:"customer_id" json:"customer_id"`
@@ -54,8 +59,4 @@ type Order struct {
 	SmID              int       `db:"sm_id" json:"sm_id"`
 	DateCreated       time.Time `db:"date_created" json:"date_created"`
 	OofShard          string    `db:"oof_shard" json:"oof_shard"`
-
-	Delivery *Delivery `json:"delivery"`
-	Payment  *Payment  `json:"payment"`
-	Items    []Item    `json:"items"`
 }

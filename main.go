@@ -20,7 +20,7 @@ func main() {
 func jsonMaker(i int) string {
 	newJson := fmt.Sprintf(`{
   "order_uid": "b563feb7b2b84b6test%d",
-  "track_number2": "WBILMTESTTRACK",
+  "track_number": "WBILMTESTTRACK",
   "entry": "WBIL",
   "delivery": {
     "name": "Test Testov",

@@ -15,22 +15,22 @@ CREATE TABLE orders
 
 CREATE TABLE delivery
 (
-    id       serial4 PRIMARY KEY,
-    order_id varchar(255) REFERENCES orders (order_uid) ON DELETE CASCADE NOT NULL,
-    name     varchar(100),
-    phone    varchar(20),
-    zip      varchar(20),
-    city     varchar(100),
-    address  varchar(200),
-    region   varchar(100),
-    email    varchar(100)
+    id        serial4 PRIMARY KEY,
+    order_uid varchar(255) REFERENCES orders (order_uid) ON DELETE CASCADE NOT NULL,
+    name      varchar(100),
+    phone     varchar(20),
+    zip       varchar(20),
+    city      varchar(100),
+    address   varchar(200),
+    region    varchar(100),
+    email     varchar(100)
 );
 
 CREATE TABLE payment
 (
     id             serial4 PRIMARY KEY,
     transaction_id varchar(50),
-    order_id       varchar(255) REFERENCES orders (order_uid) ON DELETE CASCADE,
+    order_uid      varchar(255) REFERENCES orders (order_uid) ON DELETE CASCADE,
     request_id     varchar(50),
     currency       varchar(5),
     provider       varchar(50),
@@ -45,7 +45,7 @@ CREATE TABLE payment
 CREATE TABLE items
 (
     id           serial4 PRIMARY KEY,
-    order_id     varchar(255) REFERENCES orders (order_uid) ON DELETE CASCADE NOT NULL,
+    order_uid    varchar(255) REFERENCES orders (order_uid) ON DELETE CASCADE NOT NULL,
     chrt_id      int4,
     track_number varchar(50),
     price        int4,

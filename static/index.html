@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простая HTML-страница</title>
+</head>
+<body>
+<div>
+    <button id="loadButton">Получить все заказы</button>
+    <button id="customerButton">Получить заказы по customer_id</button>
+    <button id="clearButton">Очистить</button>
+</div>
+<div>
+    <input type="text" id="jsonInput" placeholder="Поиск по customer_id">
+</div>
+<div>
+    <pre id="jsonDisplay"></pre>
+</div>
+<script>
+    const loadButton = document.getElementById('loadButton');
+    const customerButton = document.getElementById('customerButton');
+    const clearButton = document.getElementById('clearButton');
+    const jsonInput = document.getElementById('jsonInput');
+    const jsonDisplay = document.getElementById('jsonDisplay');
+
+    loadButton.addEventListener('click', () => {
+        jsonDisplay.textContent = '';
+        getOrders()
+    });
+
+    customerButton.addEventListener('click', () => {
+        jsonDisplay.textContent = '';
+        getOrderByCustomer(document.getElementById('jsonInput').value)
+    });
+
+    clearButton.addEventListener('click', () => {
+        jsonDisplay.textContent = '';
+        jsonInput.value = '';
+    });
+
+    function getOrders() {
+        fetch('/orders')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                jsonDisplay.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+    function getOrderByCustomer(customer) {
+        fetch(`/orders/${customer}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                jsonDisplay.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error fetching order data:', error);
+            });
+    }
+</script>
+</body>
+</html>

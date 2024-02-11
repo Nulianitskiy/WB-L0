@@ -3,89 +3,74 @@ package repository
 import (
 	"WB-L0/internal/model"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
-func GetAllOrders(db *sqlx.DB) []model.Order {
+func GetAllOrders(db *sqlx.DB) ([]model.Order, error) {
 	var orders []model.Order
 
-	rows, err := db.Query("SELECT * FROM orders")
-	if err != nil {
-		return nil
+	// Сначала получаем все заказы
+	if err := db.Select(&orders, "SELECT * FROM orders"); err != nil {
+		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		order := model.Order{}
-		err := rows.Scan(
-			&order.OrderUID,
-			&order.TrackNumber,
-			&order.Entry,
-			&order.Delivery,
-			&order.Payment,
-			&order.Item,
-			&order.Locale,
-			&order.InternalSignature,
-			&order.CustomerID,
-			&order.DeliveryService,
-			&order.ShardKey,
-			&order.SmID,
-			&order.DateCreated,
-			&order.OofShard,
-		)
-		if err != nil {
-			log.Printf("failed to scan orders: %v", err)
-			return nil
+	// Для каждого заказа получаем связанные с ним товары, доставку и оплату
+	for i := range orders {
+		var items []model.Item
+		if err := db.Select(&items, "SELECT * FROM items WHERE order_uid = $1", orders[i].OrderUID); err != nil {
+			return nil, err
 		}
+		orders[i].Item = items
 
-		orders = append(orders, order)
+		var delivery model.Delivery
+		if err := db.Get(&delivery, "SELECT * FROM delivery WHERE order_uid = $1", orders[i].OrderUID); err != nil {
+			return nil, err
+		}
+		orders[i].Delivery = delivery
+
+		var payment model.Payment
+		if err := db.Get(&payment, "SELECT * FROM payment WHERE order_uid = $1", orders[i].OrderUID); err != nil {
+			return nil, err
+		}
+		orders[i].Payment = payment
 	}
 
-	log.Printf("Orders wrote to memory")
-	return orders
+	return orders, nil
 }
 
-func GetOrdersByCustomer(db *sqlx.DB, customer string) []model.Order {
+func GetOrdersByCustomer(db *sqlx.DB, customer string) ([]model.Order, error) {
 	var orders []model.Order
 
-	rows, err := db.Query("SELECT * FROM orders WHERE customer_id=$1", customer)
-	if err != nil {
-		return nil
+	// Сначала получаем все заказы
+	if err := db.Select(&orders, "SELECT * FROM orders WHERE customer_id=$1", customer); err != nil {
+		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		order := model.Order{}
-		err := rows.Scan(
-			&order.OrderUID,
-			&order.TrackNumber,
-			&order.Entry,
-			&order.Delivery,
-			&order.Payment,
-			&order.Item,
-			&order.Locale,
-			&order.InternalSignature,
-			&order.CustomerID,
-			&order.DeliveryService,
-			&order.ShardKey,
-			&order.SmID,
-			&order.DateCreated,
-			&order.OofShard,
-		)
-		if err != nil {
-			log.Printf("failed to scan orders: %v", err)
-			return nil
+	// Для каждого заказа получаем связанные с ним товары, доставку и оплату
+	for i := range orders {
+		var items []model.Item
+		if err := db.Select(&items, "SELECT * FROM items WHERE order_uid = $1", orders[i].OrderUID); err != nil {
+			return nil, err
 		}
+		orders[i].Item = items
 
-		orders = append(orders, order)
+		var delivery model.Delivery
+		if err := db.Get(&delivery, "SELECT * FROM delivery WHERE order_uid = $1", orders[i].OrderUID); err != nil {
+			return nil, err
+		}
+		orders[i].Delivery = delivery
+
+		var payment model.Payment
+		if err := db.Get(&payment, "SELECT * FROM payment WHERE order_uid = $1", orders[i].OrderUID); err != nil {
+			return nil, err
+		}
+		orders[i].Payment = payment
 	}
 
-	log.Printf("Orders wrote to memory")
-	return orders
+	return orders, nil
 }
 
 func PostDelivery(db *sqlx.DB, delivery model.Delivery, orderID string) error {
-	_, err := db.Exec("INSERT INTO delivery (order_id, name, phone, zip, city, address, region, email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+	_, err := db.Exec("INSERT INTO delivery (order_uid, name, phone, zip, city, address, region, email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		orderID, delivery.Name, delivery.Phone, delivery.Zip, delivery.City, delivery.Address, delivery.Region, delivery.Email)
 	if err != nil {
 		return err
@@ -94,7 +79,7 @@ func PostDelivery(db *sqlx.DB, delivery model.Delivery, orderID string) error {
 }
 
 func PostPayment(db *sqlx.DB, payment model.Payment, orderID string) error {
-	_, err := db.Exec("INSERT INTO payment (transaction_id, order_id, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+	_, err := db.Exec("INSERT INTO payment (transaction_id, order_uid, request_id, currency, provider, amount, payment_dt, bank, delivery_cost, goods_total, custom_fee) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
 		payment.TransactionID, orderID, payment.RequestID, payment.Currency, payment.Provider, payment.Amount, payment.PaymentDT, payment.Bank, payment.DeliveryCost, payment.GoodsTotal, payment.CustomFee)
 	if err != nil {
 		return err
@@ -103,7 +88,7 @@ func PostPayment(db *sqlx.DB, payment model.Payment, orderID string) error {
 }
 
 func PostItem(db *sqlx.DB, item model.Item, orderID string) error {
-	_, err := db.Exec("INSERT INTO items (order_id, chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
+	_, err := db.Exec("INSERT INTO items (order_uid, chrt_id, track_number, price, rid, name, sale, size, total_price, nm_id, brand, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
 		orderID, item.ChrtID, item.TrackNumber, item.Price, item.RID, item.Name, item.Sale, item.Size, item.TotalPrice, item.NmID, item.Brand, item.Status)
 	if err != nil {
 		return err

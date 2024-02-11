@@ -5,10 +5,12 @@ import (
 	"WB-L0/internal/repository"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/nats-io/nats.go"
 	"log"
+	"net/http"
 )
 
 func main() {
@@ -32,6 +34,31 @@ func main() {
 
 	fmt.Println("Connected to PostgreSQL database")
 
+	router := gin.Default()
+
+	router.LoadHTMLGlob("static/*")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(200, "index.html", gin.H{})
+	})
+
+	router.GET("/orders", func(c *gin.Context) {
+		orders, err := repository.GetAllOrders(db)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, orders)
+		}
+	})
+	router.GET("/orders/:customer", func(c *gin.Context) {
+		customer := c.Param("customer")
+		orders, err := repository.GetOrdersByCustomer(db, customer)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, orders)
+		}
+	})
+
 	// Connect to a server
 	nc, err := nats.Connect(nats.DefaultURL)
 	if err != nil {
@@ -50,11 +77,11 @@ func main() {
 		if err != nil {
 			fmt.Printf("Ошибка при записи order в бд: %s\n", err)
 		}
-		err = repository.PostDelivery(db, *order.Delivery, order.OrderUID)
+		err = repository.PostDelivery(db, order.Delivery, order.OrderUID)
 		if err != nil {
 			fmt.Printf("Ошибка при записи delivery в бд: %s\n", err)
 		}
-		err = repository.PostPayment(db, *order.Payment, order.OrderUID)
+		err = repository.PostPayment(db, order.Payment, order.OrderUID)
 		if err != nil {
 			fmt.Printf("Ошибка при записи payment в бд: %s\n", err)
 		}
@@ -71,7 +98,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Close connection
-	for {
-	}
+
+	router.Run(":8080")
 }

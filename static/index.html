@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Простая HTML-страница</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>WB L0</title>
 </head>
 <body>
-<div>
+<div class="container">
     <button id="loadButton">Получить все заказы</button>
     <button id="customerButton">Получить заказы по customer_id</button>
     <button id="clearButton">Очистить</button>
-</div>
-<div>
     <input type="text" id="jsonInput" placeholder="Поиск по customer_id">
-</div>
-<div>
     <pre id="jsonDisplay"></pre>
 </div>
 <script>

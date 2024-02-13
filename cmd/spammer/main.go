@@ -60,12 +60,12 @@ func jsonMaker(i int) string {
 	  ],
 	  "locale": "en",
 	  "internal_signature": "",
-	  "customer_id": "test",
+	  "customer_id": "test%d",
 	  "delivery_service": "meest",
 	  "shardkey": "9",
 	  "sm_id": 99,
 	  "date_created": "2021-11-26T06:22:19Z",
 	  "oof_shard": "1"
-	}`, i)
+	}`, i, i%5)
 	return newJson
 }

@@ -65,9 +65,9 @@ func main() {
 		}
 	})
 
-	router.GET("/orders/:customer", func(ctx *gin.Context) {
-		customer := ctx.Param("customer")
-		orders := mycache.GetCacheOrdersByCustomer(c, customer)
+	router.GET("/orders/:id", func(ctx *gin.Context) {
+		id := ctx.Param("id")
+		orders := mycache.GetCacheOrdersById(c, id)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		} else {

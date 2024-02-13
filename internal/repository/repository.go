@@ -8,7 +8,6 @@ import (
 func GetAllOrders(db *sqlx.DB) ([]model.Order, error) {
 	var orders []model.Order
 
-	// Сначала получаем все заказы
 	if err := db.Select(&orders, "SELECT * FROM orders"); err != nil {
 		return nil, err
 	}
@@ -37,11 +36,11 @@ func GetAllOrders(db *sqlx.DB) ([]model.Order, error) {
 	return orders, nil
 }
 
-func GetOrdersByCustomer(db *sqlx.DB, customer string) ([]model.Order, error) {
+func GetOrdersById(db *sqlx.DB, id string) ([]model.Order, error) {
 	var orders []model.Order
 
 	// Сначала получаем все заказы
-	if err := db.Select(&orders, "SELECT * FROM orders WHERE customer_id=$1", customer); err != nil {
+	if err := db.Select(&orders, "SELECT * FROM orders WHERE order_uid=$1", id); err != nil {
 		return nil, err
 	}
 

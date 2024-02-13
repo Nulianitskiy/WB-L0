@@ -9,9 +9,9 @@
 <body>
 <div class="container">
     <button id="loadButton">Получить все заказы</button>
-    <button id="customerButton">Получить заказы по customer_id</button>
+    <button id="customerButton">Получить заказы по order_uid</button>
     <button id="clearButton">Очистить</button>
-    <input type="text" id="jsonInput" placeholder="Поиск по customer_id">
+    <input type="text" id="jsonInput" placeholder="Поиск по order_uid">
     <pre id="jsonDisplay"></pre>
 </div>
 <script>
@@ -51,8 +51,8 @@
                 console.error('Error fetching data:', error);
             });
     }
-    function getOrderByCustomer(customer) {
-        fetch(`/orders/${customer}`)
+    function getOrderByCustomer(id) {
+        fetch(`/orders/${id}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');

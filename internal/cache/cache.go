@@ -13,11 +13,11 @@ func GetCacheOrders(c *cache.Cache) (orders []model.Order) {
 	return orders
 }
 
-func GetCacheOrdersByCustomer(c *cache.Cache, customer string) (orders []model.Order) {
+func GetCacheOrdersById(c *cache.Cache, id string) (orders []model.Order) {
 	items := c.Items()
 	for _, item := range items {
 		order := item.Object.(model.Order)
-		if order.CustomerID == customer {
+		if order.OrderUID == id {
 			orders = append(orders, item.Object.(model.Order))
 		}
 	}
